@@ -20,21 +20,18 @@ class MyMatchesScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("My Matches", style: TextStyle(fontWeight: FontWeight.bold)),
       ),
-      body: StreamBuilder<QuerySnapshot>(
+      body: StreamBuilder<List<QueryDocumentSnapshot>>(
         stream: firestoreService.getMyMatches(currentUser.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return _buildEmptyState(context);
           }
 
-          final matches = snapshot.data!.docs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['fromUid'] == currentUser.uid || data['toUid'] == currentUser.uid;
-          }).toList();
+          final matches = snapshot.data!;
           
           // Sort by last activity
           matches.sort((a, b) {
@@ -69,13 +66,13 @@ class MyMatchesScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 5))],
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
                       leading: CircleAvatar(
                         radius: 28,
-                        backgroundColor: const Color(0xFF6C63FF).withOpacity(0.1),
+                        backgroundColor: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                         child: const Icon(Icons.handshake, color: Color(0xFF6C63FF)),
                       ),
                       title: Text(finalName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),

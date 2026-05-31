@@ -50,7 +50,7 @@ class MatchDetailScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: const Color(0xFF6C63FF).withOpacity(0.1),
+                    backgroundColor: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                     child: const Icon(Icons.person, size: 50, color: Color(0xFF6C63FF)),
                   ),
                   const SizedBox(height: 16),
@@ -113,7 +113,7 @@ class MatchDetailScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: enabled ? const Color(0xFF6C63FF) : Colors.grey.shade300,
               shape: BoxShape.circle,
-              boxShadow: enabled ? [BoxShadow(color: const Color(0xFF6C63FF).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))] : [],
+              boxShadow: enabled ? [BoxShadow(color: const Color(0xFF6C63FF).withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 5))] : [],
             ),
             child: Icon(icon, color: Colors.white),
           ),
@@ -130,7 +130,7 @@ class MatchDetailScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.1)),
+        border: Border.all(color: color.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [

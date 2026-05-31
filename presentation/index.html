@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkillMate – College Project Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #6C63FF;
+      --primary-light: #8E84FF;
+      --secondary: #FF6584;
+      --accent: #FFD166;
+      --dark: #1F2937;
+      --darker: #111827;
+      --light: #F9FAFB;
+      --gray: #6B7280;
+      --card: rgba(255,255,255,0.07);
+      --glass: rgba(255,255,255,0.12);
+    }
+
+    html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; }
+
+    /* ───── DECK ───── */
+    .deck { width: 100vw; height: 100vh; position: relative; background: var(--darker); }
+
+    /* ───── SLIDES ───── */
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 60px;
+      opacity: 0; pointer-events: none;
+      transform: translateX(60px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .slide.active {
+      opacity: 1; pointer-events: all;
+      transform: translateX(0);
+    }
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    /* ───── SLIDE 1 – TITLE ───── */
+    #s1 {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      text-align: center;
+    }
+    #s1 .logo-wrap {
+      width: 120px; height: 120px; border-radius: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 56px; margin-bottom: 32px;
+      box-shadow: 0 20px 60px rgba(108,99,255,.5);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    #s1 h1 { font-size: 72px; font-weight: 900; color: #fff; letter-spacing: -2px; }
+    #s1 h1 span { color: var(--primary-light); }
+    #s1 .tagline { font-size: 22px; color: rgba(255,255,255,.6); margin-top: 16px; font-weight: 400; }
+    #s1 .pill { display: inline-block; margin-top: 40px; padding: 10px 28px; background: var(--glass); border: 1px solid rgba(255,255,255,.2); border-radius: 999px; color: rgba(255,255,255,.8); font-size: 15px; backdrop-filter: blur(10px); }
+    .stars { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .star { position: absolute; border-radius: 50%; background: white; animation: twinkle 3s infinite; }
+    @keyframes twinkle { 0%,100%{opacity:.2} 50%{opacity:1} }
+
+    /* ───── SLIDE 2 – PROBLEM ───── */
+    #s2 { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+    #s2 .problem-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 40px; width: 100%; max-width: 960px; }
+    .prob-card {
+      background: var(--card); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px; padding: 32px 24px;
+      text-align: center; backdrop-filter: blur(10px);
+      transition: transform .3s, box-shadow .3s;
+    }
+    .prob-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,.3); }
+    .prob-card .icon { font-size: 48px; margin-bottom: 16px; }
+    .prob-card h3 { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .prob-card p { color: rgba(255,255,255,.5); font-size: 14px; line-height: 1.6; }
+
+    /* ───── SLIDE 3 – SOLUTION ───── */
+    #s3 { background: linear-gradient(135deg, #0d1117, #161b22, #21262d); }
+    #s3 .solution-content { display: flex; align-items: center; gap: 60px; width: 100%; max-width: 1000px; }
+    #s3 .phone-mock {
+      width: 240px; min-width: 240px; height: 460px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      border-radius: 40px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 30px 80px rgba(108,99,255,.5);
+      font-size: 80px;
+      position: relative; overflow: hidden;
+    }
+    #s3 .phone-mock::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.3));
+    }
+    #s3 .features-list { flex: 1; }
+    #s3 .feat-item {
+      display: flex; align-items: center; gap: 20px;
+      background: var(--card); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 20px 24px; margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+      transition: transform .3s;
+    }
+    #s3 .feat-item:hover { transform: translateX(8px); }
+    #s3 .feat-item .fi { font-size: 32px; }
+    #s3 .feat-item h4 { color: #fff; font-weight: 700; }
+    #s3 .feat-item p { color: rgba(255,255,255,.5); font-size: 13px; margin-top: 4px; }
+
+    /* ───── SLIDE 4 – TECH STACK ───── */
+    #s4 { background: linear-gradient(135deg, #0a0a0a, #1a0533, #0d1b2a); }
+    #s4 .tech-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-top: 40px; width: 100%; max-width: 960px; }
+    .tech-card {
+      background: var(--card); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px; padding: 28px 20px; text-align: center;
+      backdrop-filter: blur(10px); cursor: default;
+      transition: transform .3s, border-color .3s;
+    }
+    .tech-card:hover { transform: translateY(-8px) scale(1.03); border-color: var(--primary); }
+    .tech-card .t-icon { font-size: 44px; margin-bottom: 12px; }
+    .tech-card h4 { color: #fff; font-weight: 700; font-size: 15px; }
+    .tech-card p { color: rgba(255,255,255,.4); font-size: 12px; margin-top: 6px; }
+
+    /* ───── SLIDE 5 – FEATURES ───── */
+    #s5 { background: linear-gradient(135deg, #1a1033, #0f2027, #203a43); }
+    #s5 .features-big { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 40px; max-width: 960px; width: 100%; }
+    .feat-big-card {
+      background: var(--card); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 24px; padding: 32px;
+      backdrop-filter: blur(10px);
+      transition: transform .3s, box-shadow .3s;
+      position: relative; overflow: hidden;
+    }
+    .feat-big-card::before {
+      content: ''; position: absolute; top: -20px; right: -20px;
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--primary); opacity: .08;
+    }
+    .feat-big-card:hover { transform: translateY(-8px); box-shadow: 0 24px 48px rgba(108,99,255,.2); }
+    .feat-big-card .fbc-icon { font-size: 44px; margin-bottom: 16px; }
+    .feat-big-card h3 { color: #fff; font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .feat-big-card p { color: rgba(255,255,255,.5); font-size: 13px; line-height: 1.7; }
+
+    /* ───── SLIDE 6 – HOW IT WORKS ───── */
+    #s6 { background: linear-gradient(135deg, #0f0c29, #302b63); }
+    #s6 .steps { display: flex; align-items: flex-start; gap: 0; margin-top: 48px; max-width: 960px; width: 100%; }
+    .step {
+      flex: 1; text-align: center; position: relative;
+    }
+    .step::after {
+      content: '→'; position: absolute;
+      top: 28px; right: -12px;
+      font-size: 24px; color: rgba(255,255,255,.2);
+    }
+    .step:last-child::after { display: none; }
+    .step-num {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 800; color: white;
+      margin: 0 auto 16px; box-shadow: 0 8px 24px rgba(108,99,255,.4);
+    }
+    .step h4 { color: #fff; font-weight: 700; margin-bottom: 8px; }
+    .step p { color: rgba(255,255,255,.5); font-size: 13px; line-height: 1.6; padding: 0 16px; }
+
+    /* ───── SLIDE 7 – IMPACT ───── */
+    #s7 { background: linear-gradient(135deg, #0d1117, #1a1a2e); }
+    #s7 .stats { display: flex; gap: 32px; margin-top: 48px; max-width: 900px; width: 100%; }
+    .stat-card {
+      flex: 1; background: var(--card); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 24px; padding: 40px 24px; text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    .stat-card .stat-num { font-size: 56px; font-weight: 900; color: var(--primary-light); letter-spacing: -2px; }
+    .stat-card .stat-label { color: rgba(255,255,255,.6); font-size: 15px; margin-top: 8px; }
+
+    /* ───── SLIDE 8 – TEAM/THANK YOU ───── */
+    #s8 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); text-align: center; }
+    #s8 .ty-logo { font-size: 80px; animation: float 3s ease-in-out infinite; }
+    #s8 h1 { font-size: 60px; font-weight: 900; color: #fff; margin-top: 24px; }
+    #s8 h1 span { color: var(--primary-light); }
+    #s8 .ty-sub { color: rgba(255,255,255,.6); font-size: 18px; margin-top: 16px; }
+    #s8 .qr-row { display: flex; gap: 24px; margin-top: 40px; justify-content: center; flex-wrap: wrap; }
+    #s8 .info-pill {
+      padding: 12px 28px; background: var(--glass); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px; color: rgba(255,255,255,.9); font-size: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    /* ───── SHARED HEADINGS ───── */
+    .slide-title { color: #fff; font-size: 42px; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
+    .slide-title span { color: var(--primary-light); }
+    .slide-sub { color: rgba(255,255,255,.5); font-size: 17px; }
+
+    /* ───── NAVIGATION ───── */
+    .nav {
+      position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 16px;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 999px; padding: 12px 24px;
+      backdrop-filter: blur(20px); z-index: 100;
+    }
+    .nav button {
+      width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+      background: rgba(255,255,255,.15); color: white; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .2s;
+    }
+    .nav button:hover { background: var(--primary); transform: scale(1.1); }
+    .nav button:disabled { opacity: .3; cursor: not-allowed; }
+    .nav .dots { display: flex; gap: 8px; }
+    .nav .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,.3); cursor: pointer;
+      transition: background .3s, transform .3s;
+    }
+    .nav .dot.active { background: var(--primary-light); transform: scale(1.4); }
+
+    /* ───── SLIDE COUNT ───── */
+    .slide-count {
+      position: fixed; top: 28px; right: 36px;
+      color: rgba(255,255,255,.4); font-size: 14px; font-weight: 500;
+      z-index: 100;
+    }
+
+    /* ───── PROGRESS BAR ───── */
+    .progress {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      transition: width .5s ease; z-index: 200;
+    }
+
+    /* ───── KEYBOARD HINT ───── */
+    .hint {
+      position: fixed; top: 28px; left: 36px;
+      color: rgba(255,255,255,.3); font-size: 13px; z-index: 100;
+    }
+  </style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- Progress -->
+  <div class="progress" id="progress"></div>
+  <div class="slide-count" id="slideCount">1 / 8</div>
+  <div class="hint">← → Arrow keys to navigate</div>
+
+  <!-- ─── SLIDE 1: TITLE ─── -->
+  <div class="slide active" id="s1">
+    <div class="stars" id="stars"></div>
+    <div class="logo-wrap">🤝</div>
+    <h1>Skill<span>Mate</span></h1>
+    <p class="tagline">Swap Skills. Build Connections. Grow Together.</p>
+    <div class="pill">📱 Flutter · Firebase · AI-Powered · 2026</div>
+  </div>
+
+  <!-- ─── SLIDE 2: PROBLEM ─── -->
+  <div class="slide" id="s2">
+    <div class="slide-title">The <span>Problem</span></div>
+    <p class="slide-sub">Skills exist everywhere — but connections are limited</p>
+    <div class="problem-grid">
+      <div class="prob-card">
+        <div class="icon">💸</div>
+        <h3>Cost Barrier</h3>
+        <p>Learning new skills is expensive. Professional courses & tutors cost thousands of rupees.</p>
+      </div>
+      <div class="prob-card">
+        <div class="icon">🔗</div>
+        <h3>No Network</h3>
+        <p>Students & freelancers lack a platform to find people with complementary skills locally.</p>
+      </div>
+      <div class="prob-card">
+        <div class="icon">🕒</div>
+        <h3>Wasted Talent</h3>
+        <p>Millions of people have valuable skills sitting idle — no way to monetize or share them.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 3: SOLUTION ─── -->
+  <div class="slide" id="s3">
+    <div class="slide-title">Our <span>Solution</span></div>
+    <p class="slide-sub">A peer-to-peer skill exchange platform</p>
+    <div class="solution-content">
+      <div class="phone-mock">🤝</div>
+      <div class="features-list">
+        <div class="feat-item">
+          <span class="fi">🔄</span>
+          <div>
+            <h4>Skill Swap System</h4>
+            <p>Teach what you know. Learn what you want. No money needed.</p>
+          </div>
+        </div>
+        <div class="feat-item">
+          <span class="fi">🤖</span>
+          <div>
+            <h4>AI-Powered Matching</h4>
+            <p>Smart AI assistant suggests the best skill partners for you.</p>
+          </div>
+        </div>
+        <div class="feat-item">
+          <span class="fi">💬</span>
+          <div>
+            <h4>Real-Time Chat</h4>
+            <p>Seamlessly connect and communicate with your skill partners.</p>
+          </div>
+        </div>
+        <div class="feat-item">
+          <span class="fi">🔒</span>
+          <div>
+            <h4>Verified Profiles</h4>
+            <p>Phone OTP & Google Sign-In for trusted, secure communities.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 4: TECH STACK ─── -->
+  <div class="slide" id="s4">
+    <div class="slide-title">Tech <span>Stack</span></div>
+    <p class="slide-sub">Built with modern, scalable technologies</p>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="t-icon">💙</div>
+        <h4>Flutter</h4>
+        <p>Cross-platform mobile & web UI</p>
+      </div>
+      <div class="tech-card">
+        <div class="t-icon">🔥</div>
+        <h4>Firebase</h4>
+        <p>Auth, Firestore & Cloud Storage</p>
+      </div>
+      <div class="tech-card">
+        <div class="t-icon">🤖</div>
+        <h4>Gemini AI</h4>
+        <p>AI assistant & skill recommendations</p>
+      </div>
+      <div class="tech-card">
+        <div class="t-icon">📱</div>
+        <h4>Android / Web</h4>
+        <p>Runs on Android phones & browsers</p>
+      </div>
+      <div class="tech-card">
+        <div class="t-icon">🌐</div>
+        <h4>Google Sign-In</h4>
+        <p>Secure OAuth authentication</p>
+      </div>
+      <div class="tech-card">
+        <div class="t-icon">📨</div>
+        <h4>Phone OTP</h4>
+        <p>Verified mobile registration</p>
+      </div>
+      <div class="tech-card">
+        <div class="t-icon">📦</div>
+        <h4>Cloud Firestore</h4>
+        <p>Real-time NoSQL database</p>
+      </div>
+      <div class="tech-card">
+        <div class="t-icon">🎨</div>
+        <h4>Material 3 UI</h4>
+        <p>Beautiful, accessible design</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 5: FEATURES ─── -->
+  <div class="slide" id="s5">
+    <div class="slide-title">Key <span>Features</span></div>
+    <p class="slide-sub">Everything you need to swap skills effectively</p>
+    <div class="features-big">
+      <div class="feat-big-card">
+        <div class="fbc-icon">🏠</div>
+        <h3>Discover Feed</h3>
+        <p>Browse and filter skill partners by category — Coding, Design, Music, Marketing and more.</p>
+      </div>
+      <div class="feat-big-card">
+        <div class="fbc-icon">🤝</div>
+        <h3>Swap Requests</h3>
+        <p>Send and receive skill swap requests. Accept or decline matches with a single tap.</p>
+      </div>
+      <div class="feat-big-card">
+        <div class="fbc-icon">💬</div>
+        <h3>Real-time Chat</h3>
+        <p>Message your matches instantly. Supports unread indicators, delete messages and more.</p>
+      </div>
+      <div class="feat-big-card">
+        <div class="fbc-icon">🤖</div>
+        <h3>AI Assistant</h3>
+        <p>Ask the built-in AI for skill tips, career advice, and help finding the right swap partner.</p>
+      </div>
+      <div class="feat-big-card">
+        <div class="fbc-icon">👤</div>
+        <h3>User Profiles</h3>
+        <p>Rich profiles with skills, bio, photo, and ratings. Edit anytime from settings.</p>
+      </div>
+      <div class="feat-big-card">
+        <div class="fbc-icon">🔔</div>
+        <h3>Notifications</h3>
+        <p>Push notifications for new requests, messages and match updates via Firebase Messaging.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 6: HOW IT WORKS ─── -->
+  <div class="slide" id="s6">
+    <div class="slide-title">How It <span>Works</span></div>
+    <p class="slide-sub">Getting started is simple — just 4 steps</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4 style="color:#fff">Create Profile</h4>
+        <p>Sign up with email or Google. Add your skills and what you want to learn.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4 style="color:#fff">Discover</h4>
+        <p>Browse the feed and filter users by skill category to find ideal partners.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4 style="color:#fff">Request Swap</h4>
+        <p>Send a swap request. The other user accepts or declines your offer.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4 style="color:#fff">Connect & Grow</h4>
+        <p>Chat, schedule sessions, exchange knowledge, and grow together!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 7: IMPACT ─── -->
+  <div class="slide" id="s7">
+    <div class="slide-title">Why <span>SkillMate</span> Matters</div>
+    <p class="slide-sub">Creating real-world impact for students and professionals</p>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-num">₹0</div>
+        <div class="stat-label">Cost to learn a new skill via swap</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Skills you can exchange on the platform</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">AI assistant available anytime</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:32px;flex-wrap:wrap;justify-content:center">
+      <div style="background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);border-radius:12px;padding:16px 24px;color:rgba(255,255,255,.8);font-size:14px">🎓 Perfect for college students</div>
+      <div style="background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);border-radius:12px;padding:16px 24px;color:rgba(255,255,255,.8);font-size:14px">🌍 Works across cities & communities</div>
+      <div style="background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);border-radius:12px;padding:16px 24px;color:rgba(255,255,255,.8);font-size:14px">🚀 Scalable to millions of users</div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 8: THANK YOU ─── -->
+  <div class="slide" id="s8">
+    <div class="stars" id="stars2"></div>
+    <div class="ty-logo">🤝</div>
+    <h1>Thank <span>You!</span></h1>
+    <p class="ty-sub">Questions? We'd love to hear from you.</p>
+    <div class="qr-row">
+      <div class="info-pill">📱 Built with Flutter & Firebase</div>
+      <div class="info-pill">🤖 AI-Powered by Gemini</div>
+      <div class="info-pill">🔒 Secure · Fast · Scalable</div>
+    </div>
+    <p style="color:rgba(255,255,255,.3);font-size:14px;margin-top:48px">SkillMate © 2026 — College Project Presentation</p>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <button id="prevBtn" onclick="changeSlide(-1)" disabled>&#8592;</button>
+    <div class="dots" id="dots"></div>
+    <button id="nextBtn" onclick="changeSlide(1)">&#8594;</button>
+  </div>
+</div>
+
+<script>
+  const TOTAL = 8;
+  let current = 0;
+
+  // Generate stars
+  function makeStars(container) {
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 3 + 1;
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        top:${Math.random()*100}%; left:${Math.random()*100}%;
+        animation-delay:${Math.random()*3}s;
+        animation-duration:${Math.random()*3+2}s;
+        opacity:${Math.random()*.5+.1};
+      `;
+      container.appendChild(s);
+    }
+  }
+  makeStars(document.getElementById('stars'));
+  makeStars(document.getElementById('stars2'));
+
+  // Build dots
+  const dotsEl = document.getElementById('dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  }
+
+  function getSlide(i) { return document.getElementById(`s${i+1}`); }
+
+  function goTo(idx) {
+    const prev = getSlide(current);
+    prev.classList.remove('active');
+    prev.classList.add('exit');
+    setTimeout(() => prev.classList.remove('exit'), 500);
+
+    current = idx;
+    const next = getSlide(current);
+    next.classList.add('active');
+
+    // Dots
+    document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i === current));
+
+    // Buttons
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
+
+    // Count & progress
+    document.getElementById('slideCount').textContent = `${current+1} / ${TOTAL}`;
+    document.getElementById('progress').style.width = `${((current+1)/TOTAL)*100}%`;
+  }
+
+  function changeSlide(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < TOTAL) goTo(next);
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  });
+
+  // Init progress
+  document.getElementById('progress').style.width = `${(1/TOTAL)*100}%`;
+</script>
+</body>
+</html>

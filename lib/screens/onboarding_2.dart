@@ -19,7 +19,7 @@ class Onboarding2 extends StatelessWidget {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF6C63FF).withOpacity(0.04),
+                color: const Color(0xFF6C63FF).withValues(alpha: 0.04),
               ),
             ),
           ),
@@ -33,7 +33,7 @@ class Onboarding2 extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6C63FF).withOpacity(0.08),
+                      color: const Color(0xFF6C63FF).withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(40),
                     ),
                     child: const Icon(

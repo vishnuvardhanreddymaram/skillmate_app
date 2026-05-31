@@ -169,7 +169,7 @@ class _OTPScreenState extends State<OTPScreen> {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF6C63FF).withOpacity(0.05),
+                color: const Color(0xFF6C63FF).withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -191,7 +191,7 @@ class _OTPScreenState extends State<OTPScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6C63FF).withOpacity(0.1),
+                        color: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(

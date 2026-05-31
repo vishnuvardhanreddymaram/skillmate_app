@@ -91,11 +91,27 @@ class FirestoreService {
         .snapshots();
   }
 
-  Stream<QuerySnapshot> getMyMatches(String uid) {
-    return _db
+  Stream<List<QueryDocumentSnapshot>> getMyMatches(String uid) {
+    // Get matches where current user is either the sender or the receiver
+    final fromStream = _db
         .collection('requests')
+        .where('fromUid', isEqualTo: uid)
         .where('status', isEqualTo: 'accepted')
         .snapshots();
+
+    // Merge both streams: trigger on fromStream, fetch toUid docs as a one-shot get
+    return fromStream.asyncMap((fromSnap) async {
+      final toSnap = await _db
+          .collection('requests')
+          .where('toUid', isEqualTo: uid)
+          .where('status', isEqualTo: 'accepted')
+          .get();
+
+      final allDocs = [...fromSnap.docs, ...toSnap.docs];
+      // Remove duplicates by doc ID
+      final seen = <String>{};
+      return allDocs.where((doc) => seen.add(doc.id)).toList();
+    });
   }
 
   Future<void> acceptSwapRequest(String requestId) async {

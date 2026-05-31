@@ -27,7 +27,7 @@ android {
     defaultConfig {
         applicationId = "com.example.skillmate_app"
         // flutter_local_notifications requires minSdk >= 21
-        minSdk = flutter.minSdkVersion
+        minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

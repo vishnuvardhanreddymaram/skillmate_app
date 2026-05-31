@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/firestore_service.dart';
+import '../services/gemini_service.dart';
 
 class AIAssistantScreen extends StatefulWidget {
   const AIAssistantScreen({super.key});
@@ -13,14 +16,155 @@ class AIAssistantScreen extends StatefulWidget {
 class _AIAssistantScreenState extends State<AIAssistantScreen> {
   final TextEditingController _controller = TextEditingController();
   final FirestoreService _firestoreService = FirestoreService();
+  final GeminiService _geminiService = GeminiService();
   final ScrollController _scrollController = ScrollController();
+  
   bool _isTyping = false;
+  String? _customApiKey;
+  String? _firestoreApiKey;
+  bool _loadingKey = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadKeys();
+  }
+
+  Future<void> _loadKeys() async {
+    if (!mounted) return;
+    setState(() => _loadingKey = true);
+
+    // 1. Fetch custom key from local storage
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _customApiKey = prefs.getString('custom_gemini_api_key');
+    } catch (e) {
+      debugPrint("Error loading SharedPreferences: $e");
+    }
+
+    // 2. Fetch shared key from Firestore (config/gemini)
+    try {
+      final doc = await FirebaseFirestore.instance.collection('config').doc('gemini').get();
+      if (doc.exists) {
+        _firestoreApiKey = doc.data()?['apiKey'] as String?;
+      }
+    } catch (e) {
+      debugPrint("Error loading firestore config: $e");
+    }
+
+    if (mounted) {
+      setState(() => _loadingKey = false);
+    }
+  }
+
+  Future<void> _launchAIStudio() async {
+    final Uri url = Uri.parse('https://aistudio.google.com/app/apikey');
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        debugPrint('Could not launch $url');
+      }
+    } catch (e) {
+      debugPrint('Launch URL error: $e');
+    }
+  }
+
+  void _showKeyDialog() {
+    final controller = TextEditingController(text: _customApiKey);
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.vpn_key_rounded, color: Color(0xFF6C63FF)),
+              SizedBox(width: 10),
+              Text("Gemini API Key", style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Save your personal Gemini API Key on this device to use the AI Assistant.",
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: "API Key",
+                  hintText: "AIzaSy...",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: const Icon(Icons.key, size: 20),
+                ),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _launchAIStudio,
+                child: const Text(
+                  "Get a free API Key from Google AI Studio",
+                  style: TextStyle(
+                    color: Color(0xFF6C63FF),
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6C63FF),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () async {
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                final navigator = Navigator.of(dialogContext);
+                final key = controller.text.trim();
+                final prefs = await SharedPreferences.getInstance();
+                if (key.isEmpty) {
+                  await prefs.remove('custom_gemini_api_key');
+                  _customApiKey = null;
+                } else {
+                  await prefs.setString('custom_gemini_api_key', key);
+                  _customApiKey = key;
+                }
+                navigator.pop();
+                _loadKeys();
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(
+                    content: Text("Gemini API key saved!"),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _handleSend() async {
     if (_controller.text.trim().isEmpty) return;
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
+    final activeKey = _customApiKey ?? _firestoreApiKey;
+    if (activeKey == null || activeKey.isEmpty) {
+      _showKeyDialog();
+      return;
+    }
 
     final userMessage = _controller.text.trim();
     _controller.clear();
@@ -31,17 +175,45 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     setState(() => _isTyping = true);
     _scrollToBottom();
 
-    // Simulate AI thinking time
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      // Fetch last 15 messages for context
+      final historySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('ai_messages')
+          .orderBy('timestamp', descending: true)
+          .limit(15)
+          .get();
 
-    String response = _getAIResponse(userMessage);
+      final List<Map<String, dynamic>> chatHistory = [];
+      for (var doc in historySnapshot.docs) {
+        chatHistory.add({
+          'text': doc.data()['text'] ?? '',
+          'isMe': doc.data()['isMe'] ?? false,
+        });
+      }
 
-    // Save AI response to Firestore
-    await _firestoreService.sendAIMessage(user.uid, response, false);
+      // Query Gemini
+      final response = await _geminiService.getGeminiResponse(
+        prompt: userMessage,
+        apiKey: activeKey,
+        chatHistory: chatHistory,
+      );
 
-    if (mounted) {
-      setState(() => _isTyping = false);
-      _scrollToBottom();
+      // Save AI response to Firestore
+      await _firestoreService.sendAIMessage(user.uid, response, false);
+    } catch (e) {
+      debugPrint("AI Query failed: $e");
+      String friendlyError = "I'm sorry, I'm having trouble connecting right now. Make sure your API key is valid and you have an active internet connection.";
+      if (e.toString().contains("API key not valid")) {
+        friendlyError = "Your Gemini API key appears to be invalid. Please click the key icon at the top to reconfigure it.";
+      }
+      await _firestoreService.sendAIMessage(user.uid, friendlyError, false);
+    } finally {
+      if (mounted) {
+        setState(() => _isTyping = false);
+        _scrollToBottom();
+      }
     }
   }
 
@@ -57,39 +229,48 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     });
   }
 
-  String _getAIResponse(String query) {
-    query = query.toLowerCase().trim();
-    
-    // Greetings
-    if (query.contains('good morning')) {
-      return "Good morning! ☀️ I hope you're ready for some productive skill swapping today. How can I help you clear any doubts?";
-    } else if (query.contains('good afternoon')) {
-      return "Good afternoon! 🌤️ Looking to learn something new today? Ask me anything about SkillMate!";
-    } else if (query.contains('good evening')) {
-      return "Good evening! 🌙 It's a great time to connect with other skillmates. What's on your mind?";
-    } else if (query.contains('hello') || query.contains('hi') || query.contains('hey')) {
-      return "Hello! 👋 I'm your SkillMate Assistant. I'm here to help you find partners, explain features, or just chat about skill swapping. What's up?";
-    }
-    
-    // App Specifics
-    else if (query.contains('how') && query.contains('work')) {
-      return "It's easy! Find a partner in 'Discover', send a 'Swap Request', and once they accept, you can start chatting to share knowledge. It's a win-win!";
-    } else if (query.contains('safe') || query.contains('security') || query.contains('danger')) {
-      return "Your safety is our top priority! 🛡️ We recommend checking user reviews, meeting in public places, and starting with a video call. Never share sensitive info!";
-    } else if (query.contains('java') || query.contains('c') || query.contains('coding') || query.contains('python')) {
-      return "Great choice! We have many experts in Java, C, and Python. Just use the category filters on the Home screen to find them instantly. 💻";
-    } else if (query.contains('profile') || query.contains('complete')) {
-      return "A complete profile is your best tool! Add a photo, a nice bio, and all your skills. Check your 'Completeness Meter' in the Profile tab to see how you're doing. 📊";
-    } else if (query.contains('contact') || query.contains('phone')) {
-      return "Once a request is accepted, you can see your partner's phone number in the chat details. This makes it easy to move the conversation to WhatsApp or a call!";
-    } else if (query.contains('thank')) {
-      return "You're very welcome! 😊 I'm always here if you have more doubts. Happy swapping!";
-    }
-    
-    // Default
-    else {
-      return "I understand! That's a great point. SkillMate is all about building a community of learners. Is there anything else specific about the app, the features, or the swap process you'd like to know?";
-    }
+  Widget _buildKeyWarningBanner() {
+    final hasKey = (_customApiKey != null && _customApiKey!.isNotEmpty) ||
+        (_firestoreApiKey != null && _firestoreApiKey!.isNotEmpty);
+
+    if (hasKey || _loadingKey) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      color: Colors.amber.shade50,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "AI Assistant Not Configured",
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900, fontSize: 13),
+                ),
+                Text(
+                  "Please set your Gemini API key to start chatting.",
+                  style: TextStyle(color: Colors.amber.shade900, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: _showKeyDialog,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6C63FF),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text("Setup Key", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -111,15 +292,58 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         foregroundColor: Colors.black87,
         actions: [
           IconButton(
+            icon: Icon(
+              Icons.vpn_key_rounded,
+              color: (_customApiKey != null && _customApiKey!.isNotEmpty) ||
+                      (_firestoreApiKey != null && _firestoreApiKey!.isNotEmpty)
+                  ? const Color(0xFF6C63FF)
+                  : Colors.grey,
+            ),
+            tooltip: "Configure API Key",
+            onPressed: _showKeyDialog,
+          ),
+          IconButton(
             icon: const Icon(Icons.delete_outline, size: 20),
-            onPressed: () {
-              // Optional: Clear chat history
+            tooltip: "Clear History",
+            onPressed: () async {
+              if (user == null) return;
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Clear chat history?"),
+                  content: const Text("This will permanently delete all your conversation history with SkillMate AI."),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text("Clear", style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+              if (confirm == true) {
+                final snapshot = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('ai_messages')
+                    .get();
+                final batch = FirebaseFirestore.instance.batch();
+                for (var doc in snapshot.docs) {
+                  batch.delete(doc.reference);
+                }
+                await batch.commit();
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(content: Text("Chat history cleared.")),
+                );
+              }
             },
           ),
         ],
       ),
       body: Column(
         children: [
+          _buildKeyWarningBanner(),
           Expanded(
             child: user == null
                 ? const Center(child: Text("Please log in to use the AI Assistant"))
@@ -131,6 +355,31 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                       }
 
                       final docs = snapshot.data?.docs ?? [];
+                      
+                      if (docs.isEmpty && !_loadingKey) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.forum_outlined, size: 64, color: Colors.grey),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  "Start a conversation!",
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "Ask me about skills you want to learn, how the app works, or tips for swapping.",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.grey.shade500),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
                       
                       return ListView.builder(
                         controller: _scrollController,
@@ -184,7 +433,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
             bottomRight: Radius.circular(isMe ? 0 : 20),
           ),
           boxShadow: [
-            if (!isMe) BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5, offset: const Offset(0, 2)),
+            if (!isMe) BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 5, offset: const Offset(0, 2)),
           ],
         ),
         child: Text(
@@ -205,7 +454,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, -5)),
         ],
       ),
       child: SafeArea(

@@ -108,7 +108,7 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
         contentPadding: const EdgeInsets.all(12),
         leading: CircleAvatar(
           radius: 25,
-          backgroundColor: const Color(0xFF6C63FF).withOpacity(0.1),
+          backgroundColor: const Color(0xFF6C63FF).withValues(alpha: 0.1),
           backgroundImage: user.photoBase64 != null ? MemoryImage(base64Decode(user.photoBase64!)) : null,
           child: user.photoBase64 == null ? const Icon(Icons.person, color: Color(0xFF6C63FF)) : null,
         ),

@@ -118,7 +118,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 28),
@@ -195,7 +195,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-              color: const Color(0xFF6C63FF).withOpacity(0.1),
+              color: const Color(0xFF6C63FF).withValues(alpha: 0.1),
               child: Row(
                 children: [
                   const Icon(Icons.swap_horiz, color: Color(0xFF6C63FF), size: 20),
@@ -263,7 +263,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                               bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(2),
                             ),
                             boxShadow: [
-                              if (!isMe) BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2))
+                              if (!isMe) BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: const Offset(0, 2))
                             ],
                           ),
                           child: Text(

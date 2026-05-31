@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF6C63FF).withOpacity(0.05),
+                color: const Color(0xFF6C63FF).withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF6C63FF).withOpacity(0.05),
+                color: const Color(0xFF6C63FF).withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -122,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6C63FF).withOpacity(0.1),
+                        color: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: const Icon(
@@ -343,7 +343,7 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: Colors.grey.shade500),
-          prefixIcon: Icon(icon, color: const Color(0xFF6C63FF).withOpacity(0.7)),
+          prefixIcon: Icon(icon, color: const Color(0xFF6C63FF).withValues(alpha: 0.7)),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(

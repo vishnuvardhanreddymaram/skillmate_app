@@ -37,6 +37,7 @@ dependencies:
   intl: ^0.20.2
   uuid: ^4.2.1
   shared_preferences: ^2.2.2
+  http: ^1.2.1
 
   # Media
   image_picker: ^1.0.5

@@ -146,12 +146,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [const Color(0xFF6C63FF).withOpacity(0.1), Colors.white],
+                  colors: [const Color(0xFF6C63FF).withValues(alpha: 0.1), Colors.white],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF6C63FF).withOpacity(0.1)),
+                border: Border.all(color: const Color(0xFF6C63FF).withValues(alpha: 0.1)),
               ),
               child: Column(
                 children: [

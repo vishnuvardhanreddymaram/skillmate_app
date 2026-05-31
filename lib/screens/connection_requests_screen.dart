@@ -86,7 +86,7 @@ class ConnectionRequestsScreen extends StatelessWidget {
                         contentPadding: const EdgeInsets.all(16),
                         leading: CircleAvatar(
                           radius: 28,
-                          backgroundColor: const Color(0xFF6C63FF).withOpacity(0.1),
+                          backgroundColor: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                           child: const Icon(Icons.person_add_rounded, color: Color(0xFF6C63FF), size: 28),
                         ),
                         title: Text(

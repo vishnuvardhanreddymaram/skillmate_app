@@ -1,12 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import '../models/user_model.dart';
 import 'firestore_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // On web, clientId is needed. On Android, serverClientId is required to retrieve the idToken.
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId: '837987113396-032hs7p88g0cnr0qpum1lodult1ihbah.apps.googleusercontent.com',
+    clientId: kIsWeb
+        ? '837987113396-032hs7p88g0cnr0qpum1lodult1ihbah.apps.googleusercontent.com'
+        : null,
+    serverClientId: '837987113396-032hs7p88g0cnr0qpum1lodult1ihbah.apps.googleusercontent.com',
   );
   final FirestoreService _firestoreService = FirestoreService();
 
@@ -66,16 +72,27 @@ class AuthService {
   // Google Sign-In
   Future<String?> signInWithGoogle() async {
     try {
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return "Sign in cancelled";
+      UserCredential userCredential;
 
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      if (kIsWeb) {
+        // On Web: use signInWithPopup for better UX
+        final googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email');
+        googleProvider.addScope('profile');
+        userCredential = await _auth.signInWithPopup(googleProvider);
+      } else {
+        // On Android/iOS: use google_sign_in package
+        final googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) return "Sign in cancelled";
 
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+        final googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        userCredential = await _auth.signInWithCredential(credential);
+      }
+
       User? user = userCredential.user;
 
       if (user != null) {
@@ -94,20 +111,25 @@ class AuthService {
       }
       return null;
     } on FirebaseAuthException catch (e) {
-      print("Firebase Auth Error: ${e.code} - ${e.message}");
+      debugPrint("Firebase Auth Error: ${e.code} - ${e.message}");
+      if (e.code == 'popup-closed-by-user' || e.code == 'cancelled-popup-request') {
+        return "Sign in cancelled";
+      }
       return e.message ?? 'Google Sign-In failed.';
     } catch (e, stack) {
-      print("Google Sign-In Exception: $e");
-      print("Stack trace: $stack");
+      debugPrint("Google Sign-In Exception: $e");
+      debugPrint("Stack trace: $stack");
       return "An unexpected error occurred during Google Sign-In: $e";
     }
   }
 
   // Sign out
   Future<void> signOut() async {
-    try {
-      await _googleSignIn.signOut();
-    } catch (_) {}
+    if (!kIsWeb) {
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
+    }
     await _auth.signOut();
   }
 

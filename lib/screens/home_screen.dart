@@ -214,9 +214,10 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
+      builder: (dialogContext) {
+        final nav = Navigator.of(dialogContext);
         Future.delayed(const Duration(seconds: 2), () {
-          if (Navigator.canPop(context)) Navigator.pop(context);
+          if (nav.canPop()) nav.pop();
         });
         return Center(
           child: Column(
@@ -254,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: ClipRRect(
@@ -274,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor: const Color(0xFF6C63FF).withOpacity(0.1),
+                    backgroundColor: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                     backgroundImage: user.photoBase64 != null ? MemoryImage(base64Decode(user.photoBase64!)) : null,
                     child: user.photoBase64 == null ? const Icon(Icons.person, color: Color(0xFF6C63FF), size: 30) : null,
                   ),
@@ -370,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onSelected: (selected) {
                 setState(() => _selectedCategory = category);
               },
-              selectedColor: const Color(0xFF6C63FF).withOpacity(0.2),
+              selectedColor: const Color(0xFF6C63FF).withValues(alpha: 0.2),
               checkmarkColor: const Color(0xFF6C63FF),
               labelStyle: TextStyle(
                 color: isSelected ? const Color(0xFF6C63FF) : Colors.black87,
@@ -396,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
           child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color)),
         ),
         const SizedBox(width: 12),
@@ -433,7 +434,7 @@ class DailySkillInsightCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6C63FF).withOpacity(0.3),
+            color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -447,7 +448,7 @@ class DailySkillInsightCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(

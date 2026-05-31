@@ -136,7 +136,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF6C63FF).withOpacity(0.05),
+                color: const Color(0xFF6C63FF).withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -158,7 +158,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6C63FF).withOpacity(0.1),
+                        color: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(

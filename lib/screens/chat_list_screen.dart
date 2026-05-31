@@ -48,32 +48,30 @@ class ChatListScreen extends StatelessWidget {
           Expanded(
             child: currentUser == null
                 ? const Center(child: Text("Login to see chats"))
-                : StreamBuilder<QuerySnapshot>(
+                : StreamBuilder<List<QueryDocumentSnapshot>>(
                     stream: firestoreService.getMyMatches(currentUser.uid),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
-                      final matches = snapshot.data?.docs.where((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        return data['fromUid'] == currentUser.uid || data['toUid'] == currentUser.uid;
-                      }).toList() ?? [];
+                      final matches = snapshot.data ?? [];
 
                       // Sort by last message timestamp or creation timestamp
-                      matches.sort((a, b) {
-                        final aData = a.data() as Map<String, dynamic>;
-                        final bData = b.data() as Map<String, dynamic>;
-                        final aTime = aData['lastTimestamp'] ?? aData['timestamp'] ?? Timestamp.now();
-                        final bTime = bData['lastTimestamp'] ?? bData['timestamp'] ?? Timestamp.now();
-                        return bTime.compareTo(aTime);
-                      });
+                      final sortedMatches = List<QueryDocumentSnapshot>.from(matches)
+                        ..sort((a, b) {
+                          final aData = a.data() as Map<String, dynamic>;
+                          final bData = b.data() as Map<String, dynamic>;
+                          final aTime = aData['lastTimestamp'] ?? aData['timestamp'] ?? Timestamp.now();
+                          final bTime = bData['lastTimestamp'] ?? bData['timestamp'] ?? Timestamp.now();
+                          return bTime.compareTo(aTime);
+                        });
 
                       // Deduplicate: Only show one chat per user pair
                       final List<QueryDocumentSnapshot> uniqueMatches = [];
                       final Set<String> seenUids = {};
 
-                      for (var match in matches) {
+                      for (var match in sortedMatches) {
                         final data = match.data() as Map<String, dynamic>;
                         final String otherUid = data['fromUid'] == currentUser.uid ? data['toUid'] : data['fromUid'];
                         if (!seenUids.contains(otherUid)) {
@@ -117,7 +115,7 @@ class ChatListScreen extends StatelessWidget {
                               return Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: hasUnread ? const Color(0xFF6C63FF).withOpacity(0.05) : Colors.transparent,
+                                  color: hasUnread ? const Color(0xFF6C63FF).withValues(alpha: 0.05) : Colors.transparent,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: ListTile(
@@ -126,7 +124,7 @@ class ChatListScreen extends StatelessWidget {
                                     children: [
                                       CircleAvatar(
                                         radius: 28,
-                                        backgroundColor: const Color(0xFF6C63FF).withOpacity(0.1),
+                                        backgroundColor: const Color(0xFF6C63FF).withValues(alpha: 0.1),
                                         child: Text(
                                           finalName.isNotEmpty ? finalName[0].toUpperCase() : 'U',
                                           style: const TextStyle(color: Color(0xFF6C63FF), fontWeight: FontWeight.bold, fontSize: 18),
@@ -205,9 +203,9 @@ class ChatListScreen extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFF6C63FF).withOpacity(0.05),
+            color: const Color(0xFF6C63FF).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF6C63FF).withOpacity(0.1)),
+            border: Border.all(color: const Color(0xFF6C63FF).withValues(alpha: 0.1)),
           ),
           child: Column(
             children: [

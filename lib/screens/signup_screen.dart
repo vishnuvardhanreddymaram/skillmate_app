@@ -150,7 +150,7 @@ class _SignupScreenState extends State<SignupScreen> {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF6C63FF).withOpacity(0.05),
+                color: const Color(0xFF6C63FF).withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -407,7 +407,7 @@ class _SignupScreenState extends State<SignupScreen> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
-          prefixIcon: Icon(icon, color: const Color(0xFF6C63FF).withOpacity(0.7)),
+          prefixIcon: Icon(icon, color: const Color(0xFF6C63FF).withValues(alpha: 0.7)),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
