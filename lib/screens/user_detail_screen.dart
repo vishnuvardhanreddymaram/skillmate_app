@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firestore_service.dart';
 import '../models/user_model.dart';
+import 'my_portfolio_screen.dart';
+import 'reviews_screen.dart';
 import 'dart:convert';
 
 class UserDetailScreen extends StatefulWidget {
@@ -91,6 +93,15 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
+            // Quick Actions: Portfolio and Reviews
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildQuickAction(context, "Portfolio", Icons.photo_library, MyPortfolioScreen(targetUserId: user.uid, targetUserName: user.name)),
+                _buildQuickAction(context, "Reviews", Icons.star, ReviewsScreen(targetUserId: user.uid, targetUserName: user.name)),
+              ],
+            ),
+            const SizedBox(height: 24),
             _buildInfoCard("I can teach", user.skillsHave, Icons.check_circle, Colors.green),
             const SizedBox(height: 16),
             _buildInfoCard("I want to learn", user.skillsWant, Icons.search, Colors.orange),
@@ -126,6 +137,27 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         leading: Icon(icon, color: iconColor),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(content.isEmpty ? 'Not specified' : content),
+      ),
+    );
+  }
+
+  Widget _buildQuickAction(BuildContext context, String title, IconData icon, Widget target) {
+    return InkWell(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => target)),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: const Color(0xFFE0E7FF),
+              child: Icon(icon, color: const Color(0xFF6C63FF)),
+            ),
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
       ),
     );
   }

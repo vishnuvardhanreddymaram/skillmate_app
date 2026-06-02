@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "837987113396",
+    "project_id": "skillmate-2026",
+    "storage_bucket": "skillmate-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:837987113396:android:f2d81f9ec9f881780bfae1",
+        "android_client_info": {
+          "package_name": "com.example.skillmate_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "837987113396-8n7jo3nishm391h1srs0cn2t0kd4bk05.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.skillmate_app",
+            "certificate_hash": "0f92d5573ad05b20e0d5a82bc49a0234358daa89"
+          }
+        },
+        {
+          "client_id": "837987113396-032hs7p88g0cnr0qpum1lodult1ihbah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0Y3fygPPcaKa4wjGW5syRqmxe3OZs_JE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "837987113396-032hs7p88g0cnr0qpum1lodult1ihbah.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
