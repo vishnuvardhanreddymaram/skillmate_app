@@ -278,75 +278,72 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Row(
-          children: [
-            Icon(Icons.auto_awesome, color: Color(0xFF6C63FF), size: 20),
-            SizedBox(width: 8),
-            Text("SkillMate AI", style: TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        backgroundColor: Colors.white,
+        title: const Text("SkillMate AI", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black87,
-        actions: [
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.play_circle_fill, color: Colors.white),
+                onPressed: () => Navigator.pushNamed(context, '/demo'),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.vpn_key_rounded,
+                  color: (_customApiKey != null && _customApiKey!.isNotEmpty) ||
+                      (_firestoreApiKey != null && _firestoreApiKey!.isNotEmpty)
+                      ? const Color(0xFF6C63FF)
+                      : Colors.grey,
+                ),
+                tooltip: "Configure API Key",
+                onPressed: _showKeyDialog,
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, size: 20),
+                tooltip: "Clear History",
+                onPressed: () async {
+                  if (user == null) return;
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Clear chat history?"),
+                      content: const Text("This will permanently delete all your conversation history with SkillMate AI."),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text("Clear", style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    final snapshot = await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .collection('ai_messages')
+                        .get();
+                    final batch = FirebaseFirestore.instance.batch();
+                    for (var doc in snapshot.docs) {
+                      batch.delete(doc.reference);
+                    }
+                    await batch.commit();
+                    scaffoldMessenger.showSnackBar(const SnackBar(content: Text("Chat history cleared.")));
+                  }
+                },
+              ),
+            ],
+          IconButton(
+            icon: const Icon(Icons.play_circle_fill, color: Colors.white),
+            onPressed: () => Navigator.pushNamed(context, '/demo'),
+          ),
           IconButton(
             icon: Icon(
               Icons.vpn_key_rounded,
               color: (_customApiKey != null && _customApiKey!.isNotEmpty) ||
                       (_firestoreApiKey != null && _firestoreApiKey!.isNotEmpty)
-                  ? const Color(0xFF6C63FF)
-                  : Colors.grey,
-            ),
-            tooltip: "Configure API Key",
-            onPressed: _showKeyDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, size: 20),
-            tooltip: "Clear History",
-            onPressed: () async {
-              if (user == null) return;
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text("Clear chat history?"),
-                  content: const Text("This will permanently delete all your conversation history with SkillMate AI."),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text("Clear", style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
-                ),
-              );
-              if (confirm == true) {
-                final snapshot = await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(user.uid)
-                    .collection('ai_messages')
-                    .get();
-                final batch = FirebaseFirestore.instance.batch();
-                for (var doc in snapshot.docs) {
-                  batch.delete(doc.reference);
-                }
-                await batch.commit();
-                scaffoldMessenger.showSnackBar(
-                  const SnackBar(content: Text("Chat history cleared.")),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildKeyWarningBanner(),
-          Expanded(
-            child: user == null
-                ? const Center(child: Text("Please log in to use the AI Assistant"))
                 : StreamBuilder<QuerySnapshot>(
                     stream: _firestoreService.getAIMessages(user.uid),
                     builder: (context, snapshot) {
