@@ -32,6 +32,7 @@ dependencies:
   smooth_page_indicator: ^2.0.1
   lottie: ^3.3.3
   badges: ^3.1.2
+  google_fonts: ^6.2.1  # Added for custom typography
 
   # Utils
   intl: ^0.20.2

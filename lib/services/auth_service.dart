@@ -16,7 +16,7 @@ class AuthService {
   );
   final FirestoreService _firestoreService = FirestoreService();
 
-  // Signup with additional data - creates email/password account and Firestore profile
+  // Sign up with additional data - creates email/password account and Firestore profile via linking
   Future<String?> signUp({
     required String email,
     required String password,
@@ -26,17 +26,28 @@ class AuthService {
     String? phone,
   }) async {
     try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      // Create email/password credential
+      final credential = EmailAuthProvider.credential(email: email, password: password);
+      // Link with existing (phone) user if present
+      User? currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        await currentUser.linkWithCredential(credential);
+        await currentUser.updateDisplayName(name);
+      } else {
+        // No current user, fallback to creating a new email user
+        UserCredential result = await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        currentUser = result.user;
+        if (currentUser != null) {
+          await currentUser.updateDisplayName(name);
+        }
+      }
 
-      User? user = result.user;
-      if (user != null) {
-        await user.updateDisplayName(name);
-
+      if (currentUser != null) {
         UserModel newUser = UserModel(
-          uid: user.uid,
+          uid: currentUser.uid,
           name: name,
           email: email,
           bio: 'Hey there! I am using SkillMate to swap skills.',
@@ -49,6 +60,40 @@ class AuthService {
       return null;
     } on FirebaseAuthException catch (e) {
       return e.message ?? 'An error occurred during sign up.';
+    } catch (e) {
+      return "An unknown error occurred";
+    }
+  }
+
+  // Link Email/Password to the current user
+  Future<String?> linkEmailAndPassword({
+    required String email,
+    required String password,
+    required String name,
+    required String skillsHave,
+    required String skillsWant,
+  }) async {
+    try {
+      User? currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        final credential = EmailAuthProvider.credential(email: email, password: password);
+        await currentUser.linkWithCredential(credential);
+        await currentUser.updateDisplayName(name);
+
+        UserModel newUser = UserModel(
+          uid: currentUser.uid,
+          name: name,
+          email: email,
+          bio: 'Hey there! I am using SkillMate to swap skills.',
+          skillsHave: skillsHave,
+          skillsWant: skillsWant,
+          phone: currentUser.phoneNumber,
+        );
+        await _firestoreService.createUserProfile(newUser);
+      }
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return e.message ?? 'An error occurred during linking.';
     } catch (e) {
       return "An unknown error occurred";
     }

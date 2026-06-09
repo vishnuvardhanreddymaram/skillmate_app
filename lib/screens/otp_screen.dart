@@ -108,13 +108,12 @@ class _OTPScreenState extends State<OTPScreen> {
       final credential = await _auth.signInWithOTP(_currentVerificationId, smsCode);
 
       if (credential != null) {
-        String? error = await _auth.signUp(
+        String? error = await _auth.linkEmailAndPassword(
           email: widget.signupData['email'],
           password: widget.signupData['password'],
           name: widget.signupData['name'],
           skillsHave: widget.signupData['skillsHave'],
           skillsWant: widget.signupData['skillsWant'],
-          phone: widget.phoneNumber,
         );
 
         if (mounted) {
