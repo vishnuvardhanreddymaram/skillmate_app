@@ -1,1 +1,26 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"skillmate-2026","appId":"1:837987113396:android:f2d81f9ec9f881780bfae1","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"skillmate-2026","configurations":{"android":"1:837987113396:android:f2d81f9ec9f881780bfae1","web":"1:837987113396:web:77a76960c8e508010bfae1"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "skillmate-2026",
+          "appId": "1:837987113396:android:f2d81f9ec9f881780bfae1",
+          "fileOutput": "android/app/google-services.json"
+        }
+      }
+    },
+    "dart": {
+      "lib/firebase_options.dart": {
+        "projectId": "skillmate-2026",
+        "configurations": {
+          "android": "1:837987113396:android:f2d81f9ec9f881780bfae1",
+          "web": "1:837987113396:web:77a76960c8e508010bfae1"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
