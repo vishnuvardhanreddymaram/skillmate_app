@@ -1,0 +1,41 @@
+name: SkillMate E2E Testing CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-e2e-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'e2e_tests/package-lock.json'
+
+    - name: Install Dependencies
+      run: |
+        cd e2e_tests
+        npm ci
+
+    - name: Run E2E Selenium Tests
+      run: |
+        cd e2e_tests
+        node run_tests.js
+      env:
+        CI: true
+
+    - name: Upload Test Report Artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: E2E-Test-Report
+        path: e2e_tests/E2E_Test_Report_SkillMate.xlsx
