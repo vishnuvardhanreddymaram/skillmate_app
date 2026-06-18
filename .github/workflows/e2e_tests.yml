@@ -31,6 +31,12 @@ jobs:
         cd e2e_tests
         npm audit --audit-level=high
 
+    - name: Setup Chrome (headless)
+      uses: actions/setup-chrome@v3
+      with:
+        chrome-version: latest
+        cache: true
+
     - name: Run E2E Selenium Tests
       run: |
         cd e2e_tests
