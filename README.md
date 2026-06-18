@@ -52,7 +52,7 @@ npm audit --audit-level=high
 Any high‑ or critical‑severity CVEs will cause the CI job to fail, ensuring you catch vulnerable dependencies early.
 
 ## Deploying the Web Front‑end
-The web version is hosted on Vercel (URL: `https://skillmate-app.vercel.app`). After merging to `main`, Vercel automatically builds and deploys the web app.
+The web version is hosted on Vercel (URL: `https://skillmate-app-topaz.vercel.app`). After merging to `main`, Vercel automatically builds and deploys the web app.
 
 ## Useful Commands Summary
 | Action | Command |
