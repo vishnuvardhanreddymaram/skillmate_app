@@ -26,6 +26,11 @@ jobs:
         cd e2e_tests
         npm ci
 
+    - name: Run npm audit for vulnerability scan
+      run: |
+        cd e2e_tests
+        npm audit --audit-level=high
+
     - name: Run E2E Selenium Tests
       run: |
         cd e2e_tests
@@ -38,4 +43,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: E2E-Test-Report
-        path: e2e_tests/E2E_Test_Report_SkillMate.xlsx
+        path: e2e_tests/E2E_Test_Report_SkillMate_*.xlsx
