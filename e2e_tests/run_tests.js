@@ -163,8 +163,6 @@ async function runTests() {
     let duration = 0;
     let comment = '';
 
-    console.log(`[${i + 1}/${testCases.length}] Running ${tc.id}: ${tc.description}`);
-
     try {
       if (driver) {
         // Perform webdriver steps depending on the test suite
@@ -222,10 +220,17 @@ async function runTests() {
     } catch (err) {
       status = 'FAIL';
       comment = err.message;
-      console.log(`   └─ FAIL: ${err.message}`);
     }
 
     duration = Date.now() - tcStartTime;
+
+    if (status === 'PASS') {
+      console.log(`✓ [${String(i + 1).padStart(3, '0')}/100] ${tc.id} - [${tc.category}] - ${tc.suite} - ${tc.description} --> PASS (${duration}ms)`);
+    } else {
+      console.log(`✗ [${String(i + 1).padStart(3, '0')}/100] ${tc.id} - [${tc.category}] - ${tc.suite} - ${tc.description} --> FAIL (${duration}ms)`);
+      console.log(`   └─ ERROR: ${comment}`);
+    }
+
     results.push({
       ...tc,
       status,
@@ -501,8 +506,16 @@ async function generateExcelReport(results, totalDuration) {
 
   // Write file to output path
   const outputPath = path.join(__dirname, 'E2E_Test_Report_SkillMate.xlsx');
-  await workbook.xlsx.writeFile(outputPath);
-  console.log(`Excel report successfully generated at: ${outputPath}`);
+  try {
+    await workbook.xlsx.writeFile(outputPath);
+    console.log(`Excel report successfully generated at: ${outputPath}`);
+  } catch (err) {
+    if (err.code === 'EBUSY') {
+      console.error(`\n[WARNING/ERROR] The file at ${outputPath} is locked (probably open in Microsoft Excel). Please close it and re-run to update the report file.`);
+    } else {
+      console.error(`\n[ERROR] Failed to save Excel report: ${err.message}`);
+    }
+  }
 }
 
 // Execute runner
