@@ -8,6 +8,7 @@ import '../services/firestore_service.dart';
 import '../services/gemini_service.dart';
 
 
+
 class AiAssistantScreen extends StatefulWidget {
   const AiAssistantScreen({super.key});
 
