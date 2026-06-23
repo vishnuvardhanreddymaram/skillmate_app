@@ -32,10 +32,10 @@ jobs:
         npm audit --audit-level=high
 
     - name: Setup Chrome (headless)
-      uses: actions/setup-chrome@v3
+      uses: browser-actions/setup-chrome@v2
       with:
         chrome-version: latest
-        cache: true
+        install-chromedriver: true
 
     - name: Run E2E Selenium Tests
       run: |
