@@ -4,6 +4,7 @@ import '../services/firestore_service.dart';
 import '../models/user_model.dart';
 import 'package:flutter/services.dart';
 
+
 class AccountDetailsScreen extends StatelessWidget {
   const AccountDetailsScreen({super.key});
 
